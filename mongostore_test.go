@@ -97,7 +97,7 @@ func TestNewStore(t *testing.T) {
 	}
 
 	// without TTL index
-	_, err = mongoclient.Database("test-database").Collection("sessions_test").Indexes().DropAll(context.TODO())
+	err = mongoclient.Database("test-database").Collection("sessions_test").Indexes().DropAll(context.TODO())
 	if err != nil {
 		t.Fatalf("failed to drop mongo indexes: %v\n", err)
 	}

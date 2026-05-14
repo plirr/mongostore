@@ -203,12 +203,22 @@ func (s *Store) insertTTL() error {
 		if len(index) > 0 {
 
 			// does index contain a key
-			key := index.Map()["key"]
+			var key interface{}
+			for _, elem := range index {
+				if elem.Key == "key" {
+					key = elem.Value
+					break
+				}
+			}
 
 			if key != nil {
 				// does the key contain ttl
-				if key.(bson.D).Map()["ttl"] != nil {
-					foundTTLIndex = true
+				keyDoc := key.(bson.D)
+				for _, elem := range keyDoc {
+					if elem.Key == "ttl" {
+						foundTTLIndex = true
+						break
+					}
 				}
 			}
 		}
@@ -239,7 +249,6 @@ func (s *Store) insertTTL() error {
 					{Key: "ttl", Value: 1},
 				},
 				Options: options.Index().
-					SetBackground(true).
 					SetSparse(true).
 					SetExpireAfterSeconds(int32(s.defaultCookie.MaxAge)),
 			},
