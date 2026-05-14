@@ -11,19 +11,18 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // MongoSession is how sessions are stored in MongoDB.
 type MongoSession struct {
-	ID       primitive.ObjectID `bson:"_id,omitempty"`
-	Data     primitive.M        `bson:"data,omitempty"`
-	Modified primitive.DateTime `bson:"modified_at,omitempty"`
-	Expires  primitive.DateTime `bson:"expires_at,omitempty"`
-	TTL      primitive.DateTime `bson:"ttl,omitemtpy"`
+	ID       bson.ObjectID `bson:"_id,omitempty"`
+	Data     bson.M        `bson:"data,omitempty"`
+	Modified bson.DateTime `bson:"modified_at,omitempty"`
+	Expires  bson.DateTime `bson:"expires_at,omitempty"`
+	TTL      bson.DateTime `bson:"ttl,omitemtpy"`
 }
 
 // Options required for storing data in MongoDB.
@@ -155,8 +154,8 @@ func (s *Store) Save(r *http.Request, w http.ResponseWriter, session *sessions.S
 		if err != nil {
 			return fmt.Errorf("[ERROR] inserting mongo session: %v", err)
 		}
-		log.Printf("[INFO] session id: %s, inserted", res.InsertedID.(primitive.ObjectID).Hex())
-		session.ID = res.InsertedID.(primitive.ObjectID).Hex()
+		log.Printf("[INFO] session id: %s, inserted", res.InsertedID.(bson.ObjectID).Hex())
+		session.ID = res.InsertedID.(bson.ObjectID).Hex()
 	}
 
 	// existing session
@@ -255,7 +254,7 @@ func (s *Store) insertTTL() error {
 
 func (s *Store) findOne(session *sessions.Session) error {
 	// get the mongo _id from the cookie
-	oid, err := primitive.ObjectIDFromHex(session.ID)
+	oid, err := bson.ObjectIDFromHex(session.ID)
 	if err != nil {
 		return err
 	}
@@ -293,9 +292,9 @@ func (s *Store) insertOne(session *sessions.Session) (*mongo.InsertOneResult, er
 	// initialize a mongo session to insert
 	mongoSession := &MongoSession{
 		Data:     make(map[string]interface{}, len(session.Values)),
-		Modified: primitive.NewDateTimeFromTime(time.Now()),
-		Expires:  primitive.NewDateTimeFromTime(time.Now().Add(time.Duration(s.defaultCookie.MaxAge) * time.Second)),
-		TTL:      primitive.NewDateTimeFromTime(time.Now()),
+		Modified: bson.NewDateTimeFromTime(time.Now()),
+		Expires:  bson.NewDateTimeFromTime(time.Now().Add(time.Duration(s.defaultCookie.MaxAge) * time.Second)),
+		TTL:      bson.NewDateTimeFromTime(time.Now()),
 	}
 
 	// get current session.Values
@@ -317,7 +316,7 @@ func (s *Store) insertOne(session *sessions.Session) (*mongo.InsertOneResult, er
 
 func (s *Store) updateOne(session *sessions.Session) (*mongo.UpdateResult, error) {
 	// get the mongo _id from the cookie
-	oid, err := primitive.ObjectIDFromHex(session.ID)
+	oid, err := bson.ObjectIDFromHex(session.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -325,9 +324,9 @@ func (s *Store) updateOne(session *sessions.Session) (*mongo.UpdateResult, error
 	// initialize a mongo session to insert
 	mongoSession := &MongoSession{
 		Data:     make(map[string]interface{}, len(session.Values)),
-		Modified: primitive.NewDateTimeFromTime(time.Now()),
-		Expires:  primitive.NewDateTimeFromTime(time.Now().Add(time.Duration(s.defaultCookie.MaxAge) * time.Second)),
-		TTL:      primitive.NewDateTimeFromTime(time.Now()),
+		Modified: bson.NewDateTimeFromTime(time.Now()),
+		Expires:  bson.NewDateTimeFromTime(time.Now().Add(time.Duration(s.defaultCookie.MaxAge) * time.Second)),
+		TTL:      bson.NewDateTimeFromTime(time.Now()),
 	}
 
 	// get current session.Values
@@ -354,7 +353,7 @@ func (s *Store) updateOne(session *sessions.Session) (*mongo.UpdateResult, error
 
 func (s *Store) deleteOne(session *sessions.Session) (*mongo.DeleteResult, error) {
 	// convert session id to a mongo object id
-	oid, err := primitive.ObjectIDFromHex(session.ID)
+	oid, err := bson.ObjectIDFromHex(session.ID)
 	if err != nil {
 		return nil, err
 	}
