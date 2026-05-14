@@ -13,10 +13,8 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"go.mongodb.org/mongo-driver/x/bsonx"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 // MongoSession is how sessions are stored in MongoDB.
@@ -238,11 +236,8 @@ func (s *Store) insertTTL() error {
 		_, err = s.MongoStore.Collection.Indexes().CreateOne(
 			s.MongoStore.Context,
 			mongo.IndexModel{
-				Keys: bsonx.Doc{
-					bsonx.Elem{
-						Key:   "ttl",
-						Value: bsonx.Int32(1),
-					},
+				Keys: bson.D{
+					{Key: "ttl", Value: 1},
 				},
 				Options: options.Index().
 					SetBackground(true).
